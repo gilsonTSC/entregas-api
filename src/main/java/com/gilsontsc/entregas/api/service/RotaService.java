@@ -32,6 +32,18 @@ public class RotaService {
 		return this.repository.findById(id);
 	}
 	
+	public Optional<RotaEntity> buscarPorNome(String nome){
+		return this.repository.findByNome(nome);
+	}
+	
+	public Optional<RotaEntity> buscarPorVeiculo(Long id){
+		return this.repository.findByVeiculoId(id);
+	}
+	
+	public Optional<List<RotaEntity>> buscarPorStatus(String status){
+		return this.repository.findByStatus(status);
+	}
+	
 	public List<RotaEntity> buscarTodos(){
 		return this.repository.findAll();
 	}
