@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import com.gilsontsc.entregas.api.entity.CoordenadaEntity;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +30,6 @@ private Long id;
 	@NotNull(message = "Informe a data")
 	private Date instante;
 	
-	private List<CoordenadaEntity> paradas;
+	private List<CoordenadaDto> paradas;
 	
 }
