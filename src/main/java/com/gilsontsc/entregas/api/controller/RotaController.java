@@ -3,7 +3,6 @@ package com.gilsontsc.entregas.api.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import javax.validation.Valid;
 
@@ -11,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,7 +40,7 @@ public class RotaController {
 	private CoordenadaService coordenadaService;
 
 	@GetMapping
-	public ResponseEntity<Response<List<RotaDto>>> buscar(@RequestParam(value = "rotaId", required = false) Long rotaId,
+	public ResponseEntity<Response<List<RotaDto>>> buscarRotas(@RequestParam(value = "rotaId", required = false) Long rotaId,
 			@RequestParam(value = "veiculoId", required = false) Long veiculoId,
 			@RequestParam(value = "nome", required = false) String nome,
 			@RequestParam(value = "status", required = false) String status) {
@@ -60,8 +61,8 @@ public class RotaController {
 		return ResponseEntity.ok().body(response);
 	}
 
-	@GetMapping("{id}")
-	public ResponseEntity<Response<RotaDto>> buscarPorId(@PathVariable("id") Long id) {
+	@GetMapping("/{id}")
+	public ResponseEntity<Response<RotaDto>> buscarRotaPorId(@PathVariable("id") Long id) {
 		Response<RotaDto> response = new Response<RotaDto>();
 		
 		Optional<RotaEntity> rotaEntity = rotaService.buscarPorId(id);
@@ -85,6 +86,45 @@ public class RotaController {
 		RotaEntity rota = this.rotaService.salvar(this.rotaService.converteDtoParaEntity(dto));
 		response.setData(this.rotaService.converteEntityParaDto(rota));
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+	
+	@PutMapping
+	public ResponseEntity<Response<RotaDto>> atualizar(@Valid @RequestBody RotaDto dto, BindingResult result) {
+		Response<RotaDto> response = new Response<RotaDto>();
+		if(result.hasErrors()) {
+			result.getAllErrors().forEach(r -> response.getErrors().add(r.getDefaultMessage()));
+			return ResponseEntity.badRequest().body(response);
+		}
+		
+		Optional<RotaEntity> rotaEntity = this.rotaService.buscarPorId(dto.getId());
+
+		if(rotaEntity.isPresent()) {
+			RotaEntity rota = this.rotaService.salvar(this.rotaService.converteDtoParaEntity(dto));
+			response.setData(this.rotaService.converteEntityParaDto(rota));
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		}
+		response.getErrors().add("Rota não encontrada");
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+	}
+	
+	@DeleteMapping
+	public ResponseEntity<Response<String>> deleta(@Valid @RequestBody RotaDto dto, BindingResult result) {
+		return deletaPorId(dto.getId(), result);
+	}
+	
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<Response<String>> deletaPorId(@PathVariable("id") Long id, BindingResult result) {
+		Response<String> response = new Response<String>();
+		
+		Optional<RotaEntity> rotaEntity = this.rotaService.buscarPorId(id);
+
+		if(rotaEntity.isPresent()) {
+			this.rotaService.deletar(id);
+			response.setData("Rota de nome "+ rotaEntity.get().getNome() + " apagada com sucesso!");
+			return ResponseEntity.ok().body(response);
+		}
+		response.getErrors().add("Rota não encontrada");
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
 	}
 
 }
