@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,14 @@ public class RotaService {
 	
 	public Optional<List<RotaEntity>> buscarPorStatus(String status){
 		return this.repository.findByStatus(status);
+	}
+	
+	public List<RotaEntity> buscar(RotaEntity rotaFiltro) {
+		Example<RotaEntity> example = Example.of( rotaFiltro, 
+				ExampleMatcher.matching()
+					.withIgnoreCase());
+		
+		return repository.findAll(example);
 	}
 	
 	public List<RotaEntity> buscarTodos(){
