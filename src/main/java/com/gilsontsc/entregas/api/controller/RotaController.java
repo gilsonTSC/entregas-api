@@ -2,6 +2,8 @@ package com.gilsontsc.entregas.api.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 import javax.validation.Valid;
 
@@ -59,11 +61,17 @@ public class RotaController {
 	}
 
 	@GetMapping("{id}")
-	public ResponseEntity<Object> buscar(@PathVariable("id") Long id) {
-		return rotaService.buscarPorId(id)
-				.map(rota -> new ResponseEntity<Object>(this.rotaService.converteEntityParaDto(rota), HttpStatus.OK))
-				.orElseGet(
-						() -> new ResponseEntity<Object>("Rota não encontrada pelo id: " + id, HttpStatus.NOT_FOUND));
+	public ResponseEntity<Response<RotaDto>> buscarPorId(@PathVariable("id") Long id) {
+		Response<RotaDto> response = new Response<RotaDto>();
+		
+		Optional<RotaEntity> rotaEntity = rotaService.buscarPorId(id);
+		
+		if(rotaEntity.isPresent()) {
+			response.setData(this.rotaService.converteEntityParaDto(rotaEntity.get()));
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		}
+		response.getErrors().add("Rota não encontrada pelo id: " + id);
+		return ResponseEntity.badRequest().body(response);
 	}
 	
 	@PostMapping
