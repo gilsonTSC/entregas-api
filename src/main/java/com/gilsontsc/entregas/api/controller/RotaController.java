@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gilsontsc.entregas.api.dto.CoordenadaDto;
 import com.gilsontsc.entregas.api.dto.RotaDto;
 import com.gilsontsc.entregas.api.entity.RotaEntity;
 import com.gilsontsc.entregas.api.service.CoordenadaService;
@@ -125,6 +126,24 @@ public class RotaController {
 		}
 		response.getErrors().add("Rota não encontrada");
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+	}
+	
+	@GetMapping("/{id}/paradas")
+	public ResponseEntity<Response<List<CoordenadaDto>>> buscarParadasRotaporId(@PathVariable("id") Long id) {
+		Response<List<CoordenadaDto>> response = new Response<List<CoordenadaDto>>();
+		
+		Optional<RotaEntity> rotaEntity = rotaService.buscarPorId(id);
+		
+		if(rotaEntity.isPresent()) {
+			List<CoordenadaDto> coord = new ArrayList<>();
+			rotaEntity.get().getParadas().forEach(parada -> {
+				coord.add(this.coordenadaService.converteEntityParaDto(parada));
+			});
+			response.setData(coord);
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		}
+		response.getErrors().add("Rota não encontrada pelo id: " + id);
+		return ResponseEntity.badRequest().body(response);
 	}
 
 }
